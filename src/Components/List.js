@@ -4,19 +4,22 @@ import './style.css'
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { FaCalendarAlt } from 'react-icons/fa';
+import {format} from 'date-fns'
+import { forwardRef } from 'react';
 
-const CustomDatePickerInput = ({ value, onClick }) => (
+const CustomDatePickerInput = forwardRef(({ value, onClick }, ref) => (
   <div className="custom-datepicker-input">
     <input
+       ref={ref}
       type="text"
       value={value}
       onClick={onClick}
       readOnly
       placeholder="Select Deadline"
     />
-    <FaCalendarAlt className="calendar-icon" onClick={onClick} />
+    <FaCalendarAlt data-testid='calendar-icon'className="calendar-icon" onClick={onClick} />
   </div>
-);
+));
 
 const List = ({ list, boards, setBoards, handleAddCard, handleDeleteCard }) => {
   const [newCardText, setNewCardText] = useState({
@@ -33,10 +36,14 @@ const List = ({ list, boards, setBoards, handleAddCard, handleDeleteCard }) => {
     }));
   };
   const handleAddClick = () => {
+    let formattedDeadline = '';
+    if (selectedDate) {
+      formattedDeadline = format(selectedDate, 'yyyy-MM-dd');
+    }
     const currentNewCardText = {
       text: newCardText.text,
       description: newCardText.description,
-      deadline: newCardText.deadline,
+      deadline: formattedDeadline
     };
     handleAddCard(list.id, currentNewCardText);
 

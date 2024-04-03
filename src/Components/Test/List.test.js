@@ -2,7 +2,7 @@ import React from 'react';
 import { render, fireEvent, screen } from '@testing-library/react';
 import List from '../List';
 
-describe('List', () => {
+describe('List component', () => {
   const list = {
     id: 1,
     title: 'To Do',
@@ -16,7 +16,7 @@ describe('List', () => {
   const handleAddCard = jest.fn();
   const handleDeleteCard = jest.fn();
 
-  it('should render list with cards', () => {
+  it('renders the list with cards', () => {
     const { getByText } = render(
       <List list={list} boards={boards} setBoards={setBoards} handleAddCard={handleAddCard} handleDeleteCard={handleDeleteCard} />
     );
@@ -24,35 +24,24 @@ describe('List', () => {
     expect(screen.getByText('Task 2')).toBeTruthy();
   });
 
-  it('should handle input changes for adding a new task', () => {
-    const { getByPlaceholderText } = render(
+  it('calls handleAddCard on "Add Task" button click', () => {
+    const { getByText } = render(
       <List list={list} boards={boards} setBoards={setBoards} handleAddCard={handleAddCard} handleDeleteCard={handleDeleteCard} />
     );
-    fireEvent.change(screen.getByPlaceholderText('Enter list name'), { target: { value: 'New Task' } });
+    fireEvent.change(screen.getByPlaceholderText('Enter task name'), { target: { value: 'New Task' } });
     fireEvent.change(screen.getByPlaceholderText('Enter description'), { target: { value: 'New Task Description' } });
-    fireEvent.change(screen.getByPlaceholderText('Enter deadline'), { target: { value: '2023-01-01' } });
-    expect(screen.getByPlaceholderText('Enter list name').value).toBe('New Task');
-    expect(screen.getByPlaceholderText('Enter description').value).toBe('New Task Description');
-    expect(screen.getByPlaceholderText('Enter deadline').value).toBe('2023-01-01');
+  
+    fireEvent.click(screen.getByPlaceholderText('Select Deadline'));
+    fireEvent.click(screen.getByText('10')); 
+
+    const addTaskButton = screen.getByText('Add Task');
+    fireEvent.click(addTaskButton);
+
+    expect(handleAddCard).toHaveBeenCalled();
+    expect(handleAddCard).toHaveBeenCalledWith(list.id, expect.objectContaining({
+      text: 'New Task',
+      description: 'New Task Description',
+      deadline: expect.any(String),
+    }));
   });
-it('Calls handleAddCard on "Add Task" button click', () => {
-    const mockHandleAddCard = jest.fn();
-    const mockList = { id: 1, cards: [] };
-    render(<List list={mockList} handleAddCard={mockHandleAddCard} />);
-
-    const textInput = screen.getByPlaceholderText('Enter list name');
-    fireEvent.change(textInput, { target: { value: 'New Task' } });
-    const descriptionInput = screen.getByPlaceholderText('Enter description');
-    fireEvent.change(descriptionInput, { target: { value: 'New Task Description' } });
-    const deadlineInput = screen.getByPlaceholderText('Enter deadline');  // Assuming a deadline input exists
-    fireEvent.change(deadlineInput, { target: { value: '2023-01-01' } });
-
-    const addButton = screen.getByTestId(`add-task-button-${mockList.id}`);
-    fireEvent.click(addButton);
-    expect(mockHandleAddCard).toHaveBeenCalledWith(mockList.id,  {
-        text: 'New Task',
-        description: 'New Task Description',
-        deadline: '2023-01-01',
-      });
-});
 });
